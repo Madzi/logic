@@ -32,11 +32,15 @@ public class LogicConsole {
                            ", UNKNOWN=" + logicPresenter.unk() + 
                            ", TRUE=" + logicPresenter.pos() + "\n");
 
+        help();
         while (true) {
             System.out.print("> ");
             String line = scanner.nextLine().trim();
             if ("exit".equalsIgnoreCase(line)) {
                 break;
+            } else if ("help".equalsIgnoreCase(line)) {
+                help();
+                continue;
             }
             if (line.isEmpty()) continue;
 
