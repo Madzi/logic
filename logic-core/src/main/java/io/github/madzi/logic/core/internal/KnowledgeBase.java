@@ -29,22 +29,31 @@ public record KnowledgeBase(Map<String, List<Edge>> graph) {
             return null;
         }
         visited.put(current, true);
+
         List<Edge> edges = graph.get(current);
         if (null == edges) {
             return null;
         }
+
         for (Edge edge : edges) {
             if (edge.target.equals(target)) {
                 return edge.relation;
             }
+
             Relation subRelation = findPath(edge.target, target, visited);
             if (null != subRelation) {
-                return edge.relation.intersect(subRelation);
+                if (edge.relation.equals(Relation.A)) {
+                    return subRelation;
+                }
+                if (edge.relation.equals(Relation.E) && subRelation.equals(Relation.A)) {
+                    return Relation.E;
+                }
             }
         }
         return null;
     }
 
     private record Edge(String target, Relation relation) {
+
     }
 }

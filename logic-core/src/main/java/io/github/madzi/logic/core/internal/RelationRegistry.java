@@ -1,13 +1,12 @@
 package io.github.madzi.logic.core.internal;
 
+import io.github.madzi.logic.core.Logic;
 import io.github.madzi.logic.core.Relation;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public record RelationRegistry(Map<String, Relation> registry) {
-
-    private static final int LIMIT_SCORE = 5;
 
     public RelationRegistry() {
         this(new ConcurrentHashMap<>());
@@ -25,25 +24,42 @@ public record RelationRegistry(Map<String, Relation> registry) {
         return Optional.ofNullable(registry.get(name));
     }
 
-    public Optional<String> findBestMatch(final Relation relation) {
-        String bestName = null;
-        int maxScore = -1;
+    public Optional<String> deduceRelation(final Relation actual) {
+        String bestTarget = null;
+        int maxCertainty = -1;
+
         for (Map.Entry<String, Relation> entry : registry.entrySet()) {
-            int score = entry.getValue().matchScore(relation);
-            if (score > maxScore) {
-                maxScore = score;
-                bestName = entry.getKey();
+            Relation expected = entry.getValue();
+            
+            if (isDeductivelyValid(expected, actual)) {
+                int certainty = calculateCertainty(expected, actual);
+                if (certainty > maxCertainty) {
+                    maxCertainty = certainty;
+                    bestTarget = entry.getKey();
+                }
             }
         }
-        return maxScore < LIMIT_SCORE ? Optional.empty() : Optional.ofNullable(bestName);
+        return Optional.ofNullable(bestTarget);
     }
 
-    public Optional<String> nameOfRelation(final Relation relation) {
-        for (Map.Entry<String, Relation> entry : registry.entrySet()) {
-            if (entry.getValue().equals(relation)) {
-                return Optional.of(entry.getKey());
+    private boolean isDeductivelyValid(Relation expected, Relation actual) {
+        for (int i = 0; i < 8; i++) {
+            Logic exp = expected.dkscale()[i];
+            Logic act = actual.dkscale()[i];
+            if ((exp == Logic.TRUE && act == Logic.FALSE) || (exp == Logic.FALSE && act == Logic.TRUE)) {
+                return false; 
             }
         }
-        return Optional.empty();
+        return true;
+    }
+
+    private int calculateCertainty(Relation expected, Relation actual) {
+        int score = 0;
+        for (int i = 0; i < 8; i++) {
+            if (expected.dkscale()[i] == actual.dkscale()[i] && expected.dkscale()[i] != Logic.UNKNOWN) {
+                score++;
+            }
+        }
+        return score;
     }
 }

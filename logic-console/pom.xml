@@ -8,6 +8,7 @@
     </parent>
     <artifactId>logic-console</artifactId>
     <packaging>jar</packaging>
+    <name>Logic :: Console</name>
     <properties>
         <exec.mainClass>io.github.madzi.logic.console.LogicConsole</exec.mainClass>
     </properties>

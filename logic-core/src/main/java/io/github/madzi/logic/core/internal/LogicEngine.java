@@ -60,6 +60,6 @@ public record LogicEngine(ConceptState state, KnowledgeBase kb, RelationRegistry
         if (sLogic != Logic.TRUE || pLogic == Logic.UNKNOWN) {
             return Optional.empty();
         }
-        return registry.nameOfRelation(relation);
+        return registry.deduceRelation(relation);
     }
 }
