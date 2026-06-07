@@ -1,10 +1,12 @@
 package io.github.madzi.logic.console;
 
+import io.github.madzi.logic.core.Atom;
 import io.github.madzi.logic.core.Engine;
 import io.github.madzi.logic.core.Logic;
 import io.github.madzi.logic.core.LogicPresenter;
-import io.github.madzi.logic.core.Relation;
-import io.github.madzi.logic.core.RelationPresenter;
+import io.github.madzi.logic.core.relation.Relation;
+import io.github.madzi.logic.core.relation.Relation2;
+import io.github.madzi.logic.core.relation.RelationPresenter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -100,16 +102,20 @@ public class LogicConsole {
             String scaleText = mDefine.group(2).toUpperCase();
 
             Relation customRelation = relationPresenter.parse(scaleText);
-            engine.defineRelation(relName, customRelation);
+            if (customRelation instanceof Relation2 rel2) {
+                engine.defineRelation(relName, rel2);
+                System.out.println("-> DEFINE(" + relName + "," + scaleText + ")");
+            } else {
+                System.out.println("-> WARNING: 3D relations (Relation3) cannot be bound directly to Engine facts yet.");
+            }
 
-            System.out.println("-> DEFINE(" + relName + "," + scaleText + ")");
             return;
         }
 
         Matcher mQueryRel = QUERY_RELATION_CMD.matcher(cleanLine);
         if (mQueryRel.matches()) {
-            String subject = mQueryRel.group(1);
-            String predicate = mQueryRel.group(2);
+            Atom subject = Atom.create(mQueryRel.group(1).trim());
+            Atom predicate = Atom.create(mQueryRel.group(2).trim());
 
             engine.inferRelation(subject, predicate).ifPresentOrElse(
                     relName -> System.out.println("-> " + relName + "(" + subject + "," + predicate + ")"),
@@ -120,7 +126,7 @@ public class LogicConsole {
 
         Matcher mQueryStatus = QUERY_STATUS_CMD.matcher(cleanLine);
         if (mQueryStatus.matches()) {
-            String concept = mQueryStatus.group(1);
+            Atom concept = Atom.create(mQueryStatus.group(1).trim());
 
             Logic logic = engine.checkStatus(concept);
             String statusText = logicPresenter.write(logic);
@@ -133,7 +139,7 @@ public class LogicConsole {
         if (mStatus.matches()) {
             session.add(line);
             String statusSign = mStatus.group(1).toUpperCase();
-            String concept = mStatus.group(2);
+            Atom concept = Atom.create(mStatus.group(2).trim());
 
             Logic logic = logicPresenter.parse(statusSign);
             engine.status(concept, logic);
@@ -146,8 +152,8 @@ public class LogicConsole {
         if (mRel.matches()) {
             session.add(line);
             String relName = mRel.group(1).toUpperCase();
-            String subject = mRel.group(2);
-            String predicate = mRel.group(3);
+            Atom subject = Atom.create(mRel.group(2).trim());
+            Atom predicate = Atom.create(mRel.group(3).trim());
 
             engine.fact(relName, subject, predicate);
             System.out.println("-> " + relName + "(" + subject + "," + predicate + ")");

@@ -1,8 +1,5 @@
 package io.github.madzi.logic.core;
 
-/**
- * Base logic elements.
- */
 public enum Logic {
     FALSE(-1),
     UNKNOWN(0),

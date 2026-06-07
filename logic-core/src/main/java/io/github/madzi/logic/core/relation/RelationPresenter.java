@@ -1,5 +1,7 @@
-package io.github.madzi.logic.core;
+package io.github.madzi.logic.core.relation;
 
+import io.github.madzi.logic.core.Logic;
+import io.github.madzi.logic.core.LogicPresenter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,13 @@ public record RelationPresenter(LogicPresenter presenter) {
                 throw new IllegalArgumentException("Unable to parse logic element at position: " + cursor + "'" + remaining + "'");
             }
         }
-        return new Relation(scales.toArray(Logic[]::new));
+        var dkscale = scales.toArray(Logic[]::new);
+        if (dkscale.length == 4) {
+            return new Relation2(dkscale);
+        }
+        if (dkscale.length == 8) {
+            return new Relation3(dkscale);
+        }
+        throw new IllegalArgumentException("Unsupported number of elements into string");
     }
 }
