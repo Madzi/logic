@@ -17,5 +17,9 @@
             <groupId>io.github.madzi</groupId>
             <artifactId>logic-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.madzi</groupId>
+            <artifactId>logic-engine</artifactId>
+        </dependency>
     </dependencies>
 </project>
