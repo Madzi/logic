@@ -76,6 +76,19 @@ Extended relations are also supported.
 
 ---
 
+## Supported Syllogistic Modes
+
+| Figure 1 | Figure 2 | Figure 3 | Figure 4 |
+|----------|----------|----------|----------|
+| BARBARA | CESARE | DARAPTI | BAMALIP |
+| CELARENT | CAMESTRES | DISAMIS | CALEMES |
+| DARII | FESTINO | DATISI | DIMATIS |
+| FERIO | BAROCO | FELAPTON | FESAPO |
+| | | BOCARDO | FRESISON |
+| | | FERISON | |
+
+---
+
 ## Java Example
 
 ```java
@@ -109,18 +122,41 @@ This makes it possible to perform formal deductions while preserving uncertainty
 
 ## Console
 
+You can use the interactive console to explore deduction chains and reasoning paths.
+
 ```
 === Logic Console ===
-
 Logic alphabet: FALSE=F, UNKNOWN=U, TRUE=T
-
-help               - show help
-save <file.ext>    - save session
-load <file.ext>    - load session
-exit               - exit
-
-REL: S -> P        - add fact
-?: S -> P          - query deduction
+Relations:
+A: S -> P   - means: `All S are P`
+E: S -> P   - means: `No S are P`
+I: S -> P   - means: `Some S are P`
+O: S -> P   - means: `Some S are not P`
+ ----
+ help                                - this screen
+ save <file.ext>                     - save session
+ load <file.ext>                     - load session
+ exit                                - exit
+ REL: S -> P                         - add fact (REL: A, E, I, O, A', !A, !A' etc.)
+ ? : S -> P                          - query deduction (example: ?: greeks -> mortals)
+ ----
+> A: people -> mortals
+-> Accepted
+> I: people -> irish
+-> Accepted
+> A: irish -> Irland
+-> Accepted
+> E: dragon -> Irland
+-> Accepted
+> ?: mortals -> dragon
+-> Found: O: mortals -> dragon :: AOO
+> ?: people -> dragon
+-> Found: O: people -> dragon :: AOO
+> ?: dragon -> people
+-> Found: O: dragon -> people :: OAO
+> ?: people -> Irland
+-> Found: I: people -> Irland :: DARII
+> exit
 ```
 
 ---

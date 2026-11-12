@@ -69,13 +69,7 @@ public class LogicConsole {
     Scanner scanner = new Scanner(System.in);
     System.out.println("=== Logic Console ===");
     System.out.println(
-        "Logic alphabet: FALSE="
-            + logicPresenter.neg()
-            + ", UNKNOWN="
-            + logicPresenter.unk()
-            + ", TRUE="
-            + logicPresenter.pos()
-            + "\n");
+        "Logic alphabet: FALSE=" + logicPresenter.neg() + ", UNKNOWN=" + logicPresenter.unk() + ", TRUE=" + logicPresenter.pos());
     System.out.println("Relations:");
     System.out.println("A: S -> P   - means: `All S are P`");
     System.out.println("E: S -> P   - means: `No S are P`");
@@ -102,8 +96,8 @@ public class LogicConsole {
       }
       try {
         processLine(line);
-      } catch (IllegalArgumentException e) {
-        System.out.println("-> ERROR: " + e.getMessage());
+      } catch (final IllegalArgumentException exception) {
+        System.out.println("-> ERROR: " + exception.getMessage());
       }
     }
   }
