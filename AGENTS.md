@@ -10,6 +10,10 @@ The project is organized into several Maven modules:
 *   **`logic-engine`**: The main engine implementation (`LogicEngine`) for deriving deductions from a knowledge base of facts.
 *   **`logic-console`**: A command-line interface (CLI) to interact with the engine.
 *   **`logic-calc`**: Additional calculation and utility modules.
+
+Other important artefacts:
+
+* `.agents/` - provide skills for agents
 * `pom.xml` - Configuration for Maven
 * `makefile` - Build script for project
 
