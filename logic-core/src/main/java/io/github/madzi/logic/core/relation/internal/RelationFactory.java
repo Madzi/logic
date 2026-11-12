@@ -12,13 +12,37 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public enum RelationFactory {
-    INSTANCE;
-    private final Map<DKScale1, Relation1> relations1 = new ConcurrentHashMap<>();
-    private final Map<DKScale2, Relation2> relations2 = new ConcurrentHashMap<>();
-    private final Map<DKScale3, Relation3> relations3 = new ConcurrentHashMap<>();
-    private final Map<DKScale4, Relation4> relations4 = new ConcurrentHashMap<>();
-    public Relation1 createRelation(final DKScale1 scale) { return relations1.computeIfAbsent(scale, key -> new Relation1(scale)); }
-    public Relation2 createRelation(final DKScale2 scale) { return relations2.computeIfAbsent(scale, key -> new Relation2(scale)); }
-    public Relation3 createRelation(final DKScale3 scale) { return relations3.computeIfAbsent(scale, key -> new Relation3(scale)); }
-    public Relation4 createRelation(final DKScale4 scale) { return relations4.computeIfAbsent(scale, key -> new Relation4(scale)); }
+  INSTANCE;
+
+  /** Cache for Relation1 instances. */
+  private final Map<DKScale1, Relation1> relations1 = new ConcurrentHashMap<>();
+
+  /** Cache for Relation2 instances. */
+  private final Map<DKScale2, Relation2> relations2 = new ConcurrentHashMap<>();
+
+  /** Cache for Relation3 instances. */
+  private final Map<DKScale3, Relation3> relations3 = new ConcurrentHashMap<>();
+
+  /** Cache for Relation4 instances. */
+  private final Map<DKScale4, Relation4> relations4 = new ConcurrentHashMap<>();
+
+  /** Creates or retrieves a Relation1 instance. */
+  public Relation1 createRelation(final DKScale1 scale) {
+    return relations1.computeIfAbsent(scale, key -> new Relation1(scale));
+  }
+
+  /** Creates or retrieves a Relation2 instance. */
+  public Relation2 createRelation(final DKScale2 scale) {
+    return relations2.computeIfAbsent(scale, key -> new Relation2(scale));
+  }
+
+  /** Creates or retrieves a Relation3 instance. */
+  public Relation3 createRelation(final DKScale3 scale) {
+    return relations3.computeIfAbsent(scale, key -> new Relation3(scale));
+  }
+
+  /** Creates or retrieves a Relation4 instance. */
+  public Relation4 createRelation(final DKScale4 scale) {
+    return relations4.computeIfAbsent(scale, key -> new Relation4(scale));
+  }
 }

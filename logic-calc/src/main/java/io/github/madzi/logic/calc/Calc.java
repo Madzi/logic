@@ -4,9 +4,9 @@ import io.github.madzi.logic.core.relation.Relation;
 
 public interface Calc {
 
-    void clear();
+  void clear();
 
-    void define(String name, Relation<?> relation);
+  void define(String name, Relation<?> relation);
 
-    Relation<?> evaluate(String text);
+  Relation<?> evaluate(String text);
 }

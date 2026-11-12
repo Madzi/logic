@@ -30,7 +30,14 @@ build: ## Clean and build the project with tests
 run: ## Run the project locally
 	$(MVN) $(MVN_ARGS) exec:java
 
+.PHONY: format
+format: ## Format the source code using Spotless
+	$(MVN) $(MVN_ARGS) spotless:apply -Pstatic-analysis
+
+.PHONY: analysis
+analysis: ## Run all static code analysis checks (Checkstyle, PMD, SpotBugs)
+	$(MVN) $(MVN_ARGS) clean verify -Pstatic-analysis
+
 .PHONY: clean
 clean: ## Remove the target directory and build artifacts
 	$(MVN) clean
-
