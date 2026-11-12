@@ -1,5 +1,8 @@
 package io.github.madzi.logic.engine.internal;
 
+import io.github.madzi.logic.core.Logic;
+import io.github.madzi.logic.core.relation.Relation2;
+import io.github.madzi.logic.engine.Axis;
 import io.github.madzi.logic.engine.Deduction;
 import io.github.madzi.logic.engine.Engine;
 import io.github.madzi.logic.engine.Fact;
@@ -12,90 +15,137 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Логический движок для работы с фактами и дедукциями.
+ */
 public final class LogicEngine implements Engine {
     private final Map<String, List<Fact>> index = new ConcurrentHashMap<>();
     private final Map<Axis, Deduction> deductions = new ConcurrentHashMap<>();
-    @Override public void clear() {
+
+    @Override
+    public void clear() {
         index.clear();
         deductions.clear();
     }
-    @Override public Engine fact(final Fact fact) {
-        final var axis = factAxis(fact);
-        if (deductions.containsKey(axis)) {
-            System.out.println("Already known fact"); // TODO change to notifier
-            final var deprecated = deductions.get(axis);
-            if (Objects.equals(fact.relation(), deprecated.conclusion().relation())) {
-                System.out.println("Fact verified");
-            } else {
-                System.out.println("Relation changed !!!");
-                if (null != deprecated.major()) {
-                    System.out.println("Some CONFLICT into facts");
-                    cleanup(deprecated);
-                }
-            }
-        } else {
-            addToIndex(fact.subject(), fact);
-            addToIndex(fact.predicate(), fact);
-        }
-        final var deduction = new Deduction(null, null, fact);
-        deductions.put(axis, deduction);
+
+    @Override
+    public Engine fact(final Fact fact) {
+        putFact(fact);
+        // Explicitly add inverse as a known fact to ensure it's not replaced by deductions
+        final var inverse = fact.inverse();
+        mergeDeduction(inverse.axis(), factFromUser(inverse));
         return this;
     }
-    @Override public Optional<Deduction> find(final String subject, final String predicate) {
+
+    @Override
+    public Optional<Deduction> find(final String subject, final String predicate) {
         final var axis = new Axis(subject, predicate);
         return deductions.containsKey(axis) ? Optional.of(deductions.get(axis)) : Optional.empty();
     }
-    private void addKnownFact(final Axis axis, final Fact fact) {
+
+    private void putFact(final Fact fact) {
+        mergeDeduction(fact.axis(), factFromUser(fact));
     }
-    private void addUnknownFact(final Axis axis, final Fact fact) {
+
+    private void toIndex(final String name, final Fact fact) {
+        var facts = index.computeIfAbsent(name, key -> new ArrayList<>());
+        
+        for (Fact existing : facts) {
+            if (existing.axis().equals(fact.axis()) && getCertainty(existing.relation()) >= getCertainty(fact.relation())) {
+                return;
+            }
+        }
+        
+        var second = fact.axis().other(name);
+        for (Fact item : new ArrayList<>(facts)) {
+            if (!Objects.equals(second, item.axis().other(name))) {
+                combine(fact, item);
+                combine(item, fact);
+            }
+        }
+        facts.add(fact);
     }
-    private void addToIndex(final String name, final Fact fact) {
-        final var axis = new Axis(fact.subject(), fact.predicate());
-        final var list = index.computeIfAbsent(name, key -> new ArrayList<>());
-        if (!list.isEmpty()) {
-            final String second = axis.other(name);
-            for (Fact item : list) {
-                final var found = axis.other(name);
-                if (!Objects.equals(second, found)) {
-                    var hash = new Axis(name, found);
-                    if (!deductions.containsKey(hash)) {
-                        deductions.put(hash, calc(fact, item));
-                    }
-                    hash = new Axis(found, name);
-                    if (!deductions.containsKey(hash)) {
-                        deductions.put(hash, calc(item, fact));
-                    }
+
+    private void combine(final Fact fact, final Fact item) {
+        Deduction ded = null;
+        if (Objects.equals(fact.axis().y(), item.axis().x())) {
+            ded = figure1(fact, item);
+        } else if (Objects.equals(fact.axis().y(), item.axis().y())) {
+            ded = figure2(fact, item);
+        } else if (Objects.equals(fact.axis().x(), item.axis().x())) {
+            ded = figure3(fact, item);
+        } else if (Objects.equals(fact.axis().x(), item.axis().y())) {
+            ded = figure4(fact, item);
+        }
+
+        if (ded != null) {
+            mergeDeduction(ded.conclusion().axis(), ded);
+            
+            // Also derive inverse for every new deduction to keep knowledge symmetrical
+            final var inverseFact = ded.conclusion().inverse();
+            mergeDeduction(inverseFact.axis(), new Deduction(ded.minor(), ded.major(), inverseFact));
+        }
+    }
+
+    private void mergeDeduction(Axis axis, Deduction newDed) {
+        final var existing = deductions.get(axis);
+        if (existing == null) {
+            deductions.put(axis, newDed);
+            toIndex(axis.x(), newDed.conclusion());
+            toIndex(axis.y(), newDed.conclusion());
+        } else {
+            // Priority 1: User Facts (major == null) over Deductions
+            boolean existingIsFact = existing.major() == null;
+            boolean newIsFact = newDed.major() == null;
+            
+            int existingCertainty = getCertainty(existing.conclusion().relation());
+            int newCertainty = getCertainty(newDed.conclusion().relation());
+            
+            boolean shouldUpdate = false;
+            if (newIsFact && !existingIsFact) {
+                shouldUpdate = true; // Fact overrides deduction
+            } else if (newIsFact == existingIsFact) {
+                // If both are facts or both are deductions, choose more certain one
+                if (newCertainty > existingCertainty) {
+                    shouldUpdate = true;
                 }
             }
-        }
-        list.add(fact);
-    }
-    private Deduction calc(final Fact major, final Fact minor) {
-        if (Objects.equals(major.predicate(), minor.subject()) || Objects.equals(major.predicate(), minor.predicate())) {
-            if (Objects.equals(major.predicate(), minor.subject())) {
-                return new Deduction(major, minor, new Fact(major.subject(), minor.predicate(), major.relation().conclusion(minor.relation())));
-            } else {
-                return new Deduction(major, minor, new Fact(major.subject(), minor.subject(), major.relation().conclusion(minor.relation().inverse())));
-            }
-        } else {
-            if (Objects.equals(major.subject(), minor.subject())) {
-                return new Deduction(major, minor, new Fact(major.predicate(), minor.predicate(), major.inverse().relation().conclusion(minor.relation())));
-            } else {
-                return new Deduction(major, minor, new Fact(major.predicate(), minor.subject(), major.inverse().relation().conclusion(minor.inverse().relation())));
+            
+            if (shouldUpdate) {
+                deductions.put(axis, newDed);
+                toIndex(axis.x(), newDed.conclusion());
+                toIndex(axis.y(), newDed.conclusion());
             }
         }
     }
-    private void cleanup(final Deduction deduction) {
-        final Set<Axis> keys = new HashSet<>();
-        for (Map.Entry<Axis, Deduction> entry : deductions.entrySet()) {
-            var item = entry.getValue();
-            if (Objects.equals(deduction.conclusion(), item.major()) || Objects.equals(deduction.conclusion(), item.minor())) {
-                keys.add(entry.getKey());
-            }
+
+    private int getCertainty(Relation2 relation) {
+        int knownCount = 0;
+        for (Logic l : relation.dkscale().scale()) {
+            if (l != Logic.UNKNOWN) knownCount++;
         }
-        if (!keys.isEmpty()) {
-            keys.forEach(deductions::remove);
-        }
+        return knownCount;
     }
-    private Axis factAxis(final Fact fact) { return new Axis(fact.subject(), fact.predicate()); }
+
+    private Deduction figure1(final Fact fact, final Fact item) {
+        final var result = new Fact(new Axis(fact.axis().x(), item.axis().y()), fact.relation().conclusion(item.relation()));
+        return new Deduction(fact, item, result);
+    }
+
+    private Deduction figure2(final Fact fact, final Fact item) {
+        final var result = new Fact(new Axis(fact.axis().x(), item.axis().x()), fact.relation().conclusion(item.relation().inverse()));
+        return new Deduction(fact, item, result);
+    }
+
+    private Deduction figure3(final Fact fact, final Fact item) {
+        final var result = new Fact(new Axis(fact.axis().y(), item.axis().y()), fact.relation().inverse().conclusion(item.relation()));
+        return new Deduction(fact, item, result);
+    }
+
+    private Deduction figure4(final Fact fact, final Fact item) {
+        final var result = new Fact(new Axis(fact.axis().y(), item.axis().x()), fact.relation().inverse().conclusion(item.relation().inverse()));
+        return new Deduction(fact, item, result);
+    }
+
+    private Deduction factFromUser(final Fact fact) { return new Deduction(null, null, fact); }
 }

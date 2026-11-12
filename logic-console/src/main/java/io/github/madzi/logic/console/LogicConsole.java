@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
@@ -25,8 +26,41 @@ public class LogicConsole {
     private final LogicPresenter logicPresenter = LogicPresenter.FUT;
     private final RelationPresenter relationPresenter = new RelationPresenter(logicPresenter);
     
+    private static final Map<Relation2, String> RELATION_NAMES;
+    private static final Map<String, Relation2> NAME_TO_RELATION;
+
+    static {
+        RELATION_NAMES = new java.util.HashMap<>();
+        NAME_TO_RELATION = new java.util.HashMap<>();
+
+        java.util.function.BiConsumer<Relation2, String> add = (rel, name) -> {
+            RELATION_NAMES.putIfAbsent(rel, name);
+            NAME_TO_RELATION.put(name, rel);
+        };
+
+        add.accept(Relation.A(), "A");
+        add.accept(Relation.E(), "E");
+        add.accept(Relation.I(), "I");
+        add.accept(Relation.O(), "O");
+
+        add.accept(Relation.create(Relation.A().dkscale().not()), "!A");
+        add.accept(Relation.create(Relation.E().dkscale().not()), "!E");
+        add.accept(Relation.create(Relation.I().dkscale().not()), "!I");
+        add.accept(Relation.create(Relation.O().dkscale().not()), "!O");
+
+        add.accept(Relation.A().inverse(), "A'");
+        add.accept(Relation.E().inverse(), "E'");
+        add.accept(Relation.I().inverse(), "I'");
+        add.accept(Relation.O().inverse(), "O'");
+
+        add.accept(Relation.create(Relation.A().dkscale().not()).inverse(), "!A'");
+        add.accept(Relation.create(Relation.E().dkscale().not()).inverse(), "!E'");
+        add.accept(Relation.create(Relation.I().dkscale().not()).inverse(), "!I'");
+        add.accept(Relation.create(Relation.O().dkscale().not()).inverse(), "!O'");
+    }
+
     private static final Pattern FACT_PATTERN = Pattern.compile(
-        "^(\\w+|\\{[TFU]{4}\\}):\\s*(\\w+)\\s*->\\s*(\\w+)$"
+        "^([\\w'!]+|\\{[TFU]{4}\\}):\\s*(\\w+)\\s*->\\s*(\\w+)$"
     );
     private static final Pattern QUERY_PATTERN = Pattern.compile(
         "^\\?\\s*:\\s*(\\w+)\\s*->\\s*(\\w+)$"
@@ -85,7 +119,7 @@ public class LogicConsole {
         System.out.println(" save <file.ext>                     - save session");
         System.out.println(" load <file.ext>                     - load session");
         System.out.println(" exit                                - exit");
-        System.out.println(" [A|E|I|O|name]: S -> P              - add fact (example: A: greeks -> people)");
+        System.out.println(" REL: S -> P                         - add fact (REL: A, E, I, O, A', !A, !A' etc.)");
         System.out.println(" ? : S -> P                          - query deduction (example: ?: greeks -> mortals)");
         System.out.println(" ---- ");
     }
@@ -111,7 +145,7 @@ public class LogicConsole {
         String predicate = matcher.group(3);
         
         Relation2 relation = resolveRelation(relationName);
-        engine.fact(new Fact(subject, predicate, relation));
+        engine.fact(Fact.of(subject, predicate, relation));
         System.out.println("-> Accepted");
     }
 
@@ -131,13 +165,11 @@ public class LogicConsole {
             String matrix = name.substring(1, name.length() - 1);
             return (Relation2) relationPresenter.parse(matrix);
         } else {
-            return switch (name) {
-                case "A" -> Relation.A();
-                case "E" -> Relation.E();
-                case "I" -> Relation.I();
-                case "O" -> Relation.O();
-                default -> throw new IllegalArgumentException("Unknown relation: " + name);
-            };
+            Relation2 relation = NAME_TO_RELATION.get(name);
+            if (relation == null) {
+                throw new IllegalArgumentException("Unknown relation: " + name);
+            }
+            return relation;
         }
     }
 
@@ -161,47 +193,54 @@ public class LogicConsole {
     }
 
     private String formatRelation(Relation2 relation) {
-        if (relation.equals(Relation.A())) return "A";
-        if (relation.equals(Relation.E())) return "E";
-        if (relation.equals(Relation.I())) return "I";
-        if (relation.equals(Relation.O())) return "O";
-        return "{" + relationPresenter.write(relation) + "}";
+        return RELATION_NAMES.getOrDefault(relation, "{" + relationPresenter.write(relation) + "}");
     }
 
     private String detectModus(Deduction deduction) {
-        Relation2 major = deduction.major().relation();
-        Relation2 minor = deduction.minor().relation();
+        if (deduction.major() == null || deduction.minor() == null) return "UNKNOWN";
         
+        String majorRel = formatRelation(deduction.major().relation());
+        String minorRel = formatRelation(deduction.minor().relation());
+        String conclusionRel = formatRelation(deduction.conclusion().relation());
+        
+        String pattern = majorRel + minorRel + conclusionRel;
+        
+        // Figure 1: M-P, S-M => S-P
         if (Objects.equals(deduction.major().predicate(), deduction.minor().subject())) {
-            // Первая фигура: M->P, S->M => S-P
-            if (major.equals(Relation.A()) && minor.equals(Relation.A())) return "BARBARA";
-            if (major.equals(Relation.E()) && minor.equals(Relation.A())) return "CELARENT";
-            if (major.equals(Relation.I()) && minor.equals(Relation.A())) return "DARIITI";
-            if (major.equals(Relation.O()) && minor.equals(Relation.A())) return "FERIO";
+            if (majorRel.equals("A") && minorRel.equals("A")) return "BARBARA";
+            if (majorRel.equals("E") && minorRel.equals("A")) return "CELARENT";
+            if (majorRel.equals("A") && minorRel.equals("I")) return "DARII";
+            if (majorRel.equals("E") && minorRel.equals("I")) return "FERIO";
         }
         
+        // Figure 2: P-M, S-M => S-P
         if (Objects.equals(deduction.major().predicate(), deduction.minor().predicate())) {
-            // Вторая фигура: P->M, S->M => S-P
-            if (major.equals(Relation.E()) && minor.equals(Relation.A())) return "CESARE";
-            if (major.equals(Relation.A()) && minor.equals(Relation.E())) return "CAMESTRES";
-            if (major.equals(Relation.I()) && minor.equals(Relation.E())) return "FESTINO";
-            if (major.equals(Relation.O()) && minor.equals(Relation.E())) return "BAMALPO";
+            if (majorRel.equals("E") && minorRel.equals("A")) return "CESARE";
+            if (majorRel.equals("A") && minorRel.equals("E")) return "CAMESTRES";
+            if (majorRel.equals("E") && minorRel.equals("I")) return "FESTINO";
+            if (majorRel.equals("A") && minorRel.equals("O")) return "BAROCO";
         }
         
+        // Figure 3: M-P, M-S => S-P
         if (Objects.equals(deduction.major().subject(), deduction.minor().subject())) {
-            // Третья фигура: M->P, M->S => S-P
-            if (major.equals(Relation.A()) && minor.equals(Relation.A())) return "BAconTINi";
-            if (major.equals(Relation.E()) && minor.equals(Relation.A())) return "Felapton";
-            if (major.equals(Relation.I()) && minor.equals(Relation.A())) return "Datisi";
-            if (major.equals(Relation.O()) && minor.equals(Relation.A())) return "Ferison";
+            if (majorRel.equals("A") && minorRel.equals("A")) return "DARAPTI";
+            if (majorRel.equals("I") && minorRel.equals("A")) return "DISAMIS";
+            if (majorRel.equals("A") && minorRel.equals("I")) return "DATISI";
+            if (majorRel.equals("E") && minorRel.equals("A")) return "FELAPTON";
+            if (majorRel.equals("O") && minorRel.equals("A")) return "BOCARDO";
+            if (majorRel.equals("E") && minorRel.equals("I")) return "FERISON";
         }
         
+        // Figure 4: P-M, M-S => S-P
         if (Objects.equals(deduction.major().subject(), deduction.minor().predicate())) {
-            // Четвёртая фигура: P->M, M->S => S-P
-            if (major.equals(Relation.A()) && minor.equals(Relation.I())) return "BAMALPO";
+            if (majorRel.equals("A") && minorRel.equals("A")) return "BAMALIP";
+            if (majorRel.equals("A") && minorRel.equals("E")) return "CALEMES";
+            if (majorRel.equals("I") && minorRel.equals("A")) return "DIMATIS";
+            if (majorRel.equals("E") && minorRel.equals("A")) return "FESAPO";
+            if (majorRel.equals("E") && minorRel.equals("I")) return "FRESISON";
         }
         
-        return "UNKNOWN";
+        return pattern;
     }
 
     public static void main(final String... args) { new LogicConsole().start(); }
