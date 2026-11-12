@@ -76,6 +76,11 @@ public class LogicConsole {
             + ", TRUE="
             + logicPresenter.pos()
             + "\n");
+    System.out.println("Relations:");
+    System.out.println("A: S -> P   - means: `All S are P`");
+    System.out.println("E: S -> P   - means: `No S are P`");
+    System.out.println("I: S -> P   - means: `Some S are P`");
+    System.out.println("O: S -> P   - means: `Some S are not P`");
     help();
     while (true) {
       System.out.print("> ");

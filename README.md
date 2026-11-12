@@ -1,67 +1,130 @@
-# Ternary Logic Engine
+# Logic
 
-A Java implementation of a logical engine for working with facts and deductions based on syllogism (Brusentsov ternary logic).
+A deduction engine implementing Aristotelian syllogistics and Brusentsov's ternary logic.
 
-## Overview
+Logic operates on categorical propositions (A, E, I, O) and derives conclusions through classical syllogistic figures such as BARBARA, CELARENT, CESARE and CAMESTRES.
 
-This project provides a framework to represent logical facts, define relations between subjects and predicates, and derive new conclusions (deductions) using classical syllogistic reasoning. It supports various types of categorical propositions (A, E, I, O) and implements the different figures of syllogism.
+The engine is able to explain its conclusions by providing the exact syllogistic rule used during deduction.
 
-## Project Structure
+---
 
-The project is organized into several Maven modules:
+## Example
 
-*   **`logic-core`**: The core logic components, including relations, scales, and fundamental logical structures.
-*   **`logic-engine`**: The main engine implementation (`LogicEngine`) for deriving deductions from a knowledge base of facts.
-*   **`logic-console`**: A command-line interface (CLI) to interact with the engine.
-*   **`logic-calc`**: Additional calculation and utility modules.
+```
+> A: irish -> Ireland
+-> Accepted
 
-## Key Concepts
+> E: dragon -> Ireland
+-> Accepted
 
-### Logical Engine (`LogicEngine`)
+> ?: irish -> dragon
+-> Found: E: irish -> dragon :: CAMESTRES
 
-The `LogicEngine` maintains a knowledge base of facts and uses them to derive new deductions. It supports adding facts and querying for deductions between specific subjects and predicates.
-
-### Facts and Deductions
-
-*   **Fact**: Represents a logical assertion (e.g., "All humans are mortal"). A fact consists of an axis (subject and predicate) and a relation type between them.
-*   **Deduction**: The result of the reasoning process, representing a conclusion derived from premises.
-
-### Syllogistic Reasoning
-
-The engine implements classical syllogism rules to determine connections between facts based on their figures:
-- **First Figure**: $M \to P, S \to M \implies S \to P$
-- **Second Figure**: $P \to M, S \to M \implies S \text{ is not } P$ (depending on relations)
-- ... and so on for the other figures.
-
-It supports the four standard categorical propositions:
-*   **A** (Universal Affirmative): All $S$ are $P$.
-*   **E** (Universal Negative): No $S$ are $P$.
-*   **I** (Particular Affirmative): Some $S$ are $P$.
-*   **O** (Particular Negative): Some $S$ are not $P$.
-
-## Getting Started
-
-### Prerequisites
-
-*   Java 25 (or compatible JDK)
-*   Maven 3.x+
-
-### Building the Project
-
-To build and install all modules, run:
-
-```bash
-./mvnw clean install
+> ?: dragon -> irish
+-> Found: E: dragon -> irish :: CESARE
 ```
 
-### Running Tests
+Meaning:
 
-To run the tests for a specific module (e.g., `logic-engine`):
+- All Irish are in Ireland.
+- No dragons are in Ireland.
 
-```bash
-./mvnw test -pl logic-engine
+Therefore:
+
+- No Irish are dragons.
+
+The engine not only produces a conclusion but also identifies the syllogistic figure used to derive it.
+
+---
+
+## Features
+
+- Aristotelian syllogistic reasoning
+- A, E, I, O categorical propositions
+- Explainable deductions
+- Proof tracing
+- Deduction chains
+- Brusentsov-style ternary semantics
+- Java API and interactive console
+
+---
+
+## Logic Alphabet
+
+The engine operates with three logical values:
+
+| Symbol | Meaning |
+|----------|----------|
+| T | True |
+| U | Unknown / Possible |
+| F | False |
+
+Unlike binary logic, conclusions may remain uncertain when available knowledge is insufficient.
+
+---
+
+## Supported Relations
+
+| Relation | Meaning |
+|-----------|---------|
+| A | All S are P |
+| E | No S are P |
+| I | Some S are P |
+| O | Some S are not P |
+
+Extended relations are also supported.
+
+---
+
+## Java Example
+
+```java
+Engine engine = Engine.create();
+
+// All humans are mortal
+engine.fact(Fact.of("humans", "mortals", Relation.A()));
+
+// All Socrates are humans
+engine.fact(Fact.of("Socrates", "humans", Relation.A()));
+
+var result = engine.find("Socrates", "mortals");
+
+if (result.isPresent()) {
+    Deduction deduction = result.get();
+    System.out.println("Deduction found!");
+}
 ```
+
+---
+
+## Why?
+
+Most modern reasoning systems are based on binary true/false evaluation.
+
+Logic explores an alternative approach inspired by Aristotelian reasoning and Brusentsov's interpretation of ternary logic, where a proposition may be true, false, or remain possible/undetermined.
+
+This makes it possible to perform formal deductions while preserving uncertainty instead of collapsing every statement into a binary decision.
+
+---
+
+## Console
+
+```
+=== Logic Console ===
+
+Logic alphabet: FALSE=F, UNKNOWN=U, TRUE=T
+
+help               - show help
+save <file.ext>    - save session
+load <file.ext>    - load session
+exit               - exit
+
+REL: S -> P        - add fact
+?: S -> P          - query deduction
+```
+
+---
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
+MIT License
