@@ -9,26 +9,26 @@ public enum Logic {
   TRUE(1);
 
   /** The numeric value representing this logical state. */
-  private final int value;
+  private final int val;
 
   /** Constructs a Logic enum with the given numeric value. */
-  Logic(final int value) {
-    this.value = value;
+  Logic(final int val) {
+    this.val = val;
   }
 
   /** Returns the logical negation of this value. */
   public Logic not() {
-    return Logic.valueOf(-value);
+    return Logic.valueOf(-val);
   }
 
   /** Returns the logical AND of this value and another. */
   public Logic and(final Logic logic) {
-    return Logic.valueOf(Math.min(value, logic.value));
+    return Logic.valueOf(Math.min(val, logic.val));
   }
 
   /** Returns the logical OR of this value and another. */
   public Logic or(final Logic logic) {
-    return Logic.valueOf(Math.max(value, logic.value));
+    return Logic.valueOf(Math.max(val, logic.val));
   }
 
   /** Returns a Logic value from an integer. */

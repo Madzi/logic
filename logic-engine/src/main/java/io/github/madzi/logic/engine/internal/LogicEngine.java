@@ -98,17 +98,7 @@ public final class LogicEngine implements Engine {
       int existingCertainty = getCertainty(existing.conclusion().relation());
       int newCertainty = getCertainty(newDed.conclusion().relation());
 
-      boolean shouldUpdate = false;
-      if (newIsFact && !existingIsFact) {
-        shouldUpdate = true; // Fact overrides deduction
-      } else if (newIsFact == existingIsFact) {
-        // If both are facts or both are deductions, choose more certain one
-        if (newCertainty > existingCertainty) {
-          shouldUpdate = true;
-        }
-      }
-
-      if (shouldUpdate) {
+      if (newIsFact && !existingIsFact || (newIsFact == existingIsFact && newCertainty > existingCertainty)) {
         deductions.put(axis, newDed);
         toIndex(axis.x(), newDed.conclusion());
         toIndex(axis.y(), newDed.conclusion());

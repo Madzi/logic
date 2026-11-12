@@ -9,7 +9,14 @@ import io.github.madzi.logic.core.scale.DKScale4;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Presenter for reading and writing relation representations. */
 public record RelationPresenter(LogicPresenter presenter) {
+  /** Scale lengths used as constants. */
+  private static final int LENGTH_2 = 2;
+  private static final int LENGTH_4 = 4;
+  private static final int LENGTH_8 = 8;
+  private static final int LENGTH_16 = 16;
+
   /** Writes the relation to a string representation. */
   public String write(final Relation<?> relation) {
     final var builder = new StringBuilder();
@@ -43,16 +50,16 @@ public record RelationPresenter(LogicPresenter presenter) {
       }
     }
     final var dkscale = scales.toArray(Logic[]::new);
-    if (dkscale.length == 2) {
+    if (dkscale.length == LENGTH_2) {
       return new Relation1(new DKScale1(dkscale));
     }
-    if (dkscale.length == 4) {
+    if (dkscale.length == LENGTH_4) {
       return new Relation2(new DKScale2(dkscale));
     }
-    if (dkscale.length == 8) {
+    if (dkscale.length == LENGTH_8) {
       return new Relation3(new DKScale3(dkscale));
     }
-    if (dkscale.length == 16) {
+    if (dkscale.length == LENGTH_16) {
       return new Relation4(new DKScale4(dkscale));
     }
     throw new IllegalArgumentException("Unsupported number of elements into string");

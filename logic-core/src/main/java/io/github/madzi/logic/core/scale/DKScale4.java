@@ -3,45 +3,77 @@ package io.github.madzi.logic.core.scale;
 import io.github.madzi.logic.core.Logic;
 
 public record DKScale4(
+    /** Represents x AND y AND z AND w. */
     Logic xyzw,
+    /** Represents x AND y AND z AND NOT w. */
     Logic xyzw_,
+    /** Represents x AND y AND NOT z AND w. */
     Logic xyz_w,
+    /** Represents x AND y AND NOT z AND NOT w. */
     Logic xyz_w_,
+    /** Represents x AND NOT y AND z AND w. */
     Logic xy_zw,
+    /** Represents x AND NOT y AND z AND NOT w. */
     Logic xy_zw_,
+    /** Represents x AND NOT y AND NOT z AND w. */
     Logic xy_z_w,
+    /** Represents x AND NOT y AND NOT z AND NOT w. */
     Logic xy_z_w_,
+    /** Represents NOT x AND y AND z AND w. */
     Logic x_yzw,
+    /** Represents NOT x AND y AND z AND NOT w. */
     Logic x_yzw_,
+    /** Represents NOT x AND y AND NOT z AND w. */
     Logic x_yz_w,
+    /** Represents NOT x AND y AND NOT z AND NOT w. */
     Logic x_yz_w_,
+    /** Represents NOT x AND NOT y AND z AND w. */
     Logic x_y_zw,
+    /** Represents NOT x AND NOT y AND z AND NOT w. */
     Logic x_y_zw_,
+    /** Represents NOT x AND NOT y AND NOT z AND w. */
     Logic x_y_z_w,
+    /** Represents NOT x AND NOT y AND NOT z AND NOT w. */
     Logic x_y_z_w_)
     implements DKScale<DKScale4> {
   /** Length of the scale. */
   private static final int LENGTH = 16;
+  private static final int IDX_X_Y_Z_W = 0;
+  private static final int IDX_X_Y_Z_NOT_W = 1;
+  private static final int IDX_X_Y_NOT_Z_W = 2;
+  private static final int IDX_X_Y_NOT_Z_NOT_W = 3;
+  private static final int IDX_X_NOT_Y_Z_W = 4;
+  private static final int IDX_X_NOT_Y_Z_NOT_W = 5;
+  private static final int IDX_X_NOT_Y_NOT_Z_W = 6;
+  private static final int IDX_X_NOT_Y_NOT_Z_NOT_W = 7;
+  private static final int IDX_NOT_X_Y_Z_W = 8;
+  private static final int IDX_NOT_X_Y_Z_NOT_W = 9;
+  private static final int IDX_NOT_X_Y_NOT_Z_W = 10;
+  private static final int IDX_NOT_X_Y_NOT_Z_NOT_W = 11;
+  private static final int IDX_NOT_X_NOT_Y_Z_W = 12;
+  private static final int IDX_NOT_X_NOT_Y_Z_NOT_W = 13;
+  private static final int IDX_NOT_X_NOT_Y_NOT_Z_W = 14;
+  private static final int IDX_NOT_X_NOT_Y_NOT_Z_NOT_W = 15;
 
   /** Constructs a DKScale4 from an array of Logics. */
   public DKScale4(final Logic[] logics) {
     this(
-        checkLength(logics)[0],
-        logics[1],
-        logics[2],
-        logics[3],
-        logics[4],
-        logics[5],
-        logics[6],
-        logics[7],
-        logics[8],
-        logics[9],
-        logics[10],
-        logics[11],
-        logics[12],
-        logics[13],
-        logics[14],
-        logics[15]);
+        checkLength(logics)[IDX_X_Y_Z_W],
+        logics[IDX_X_Y_Z_NOT_W],
+        logics[IDX_X_Y_NOT_Z_W],
+        logics[IDX_X_Y_NOT_Z_NOT_W],
+        logics[IDX_X_NOT_Y_Z_W],
+        logics[IDX_X_NOT_Y_Z_NOT_W],
+        logics[IDX_X_NOT_Y_NOT_Z_W],
+        logics[IDX_X_NOT_Y_NOT_Z_NOT_W],
+        logics[IDX_NOT_X_Y_Z_W],
+        logics[IDX_NOT_X_Y_Z_NOT_W],
+        logics[IDX_NOT_X_Y_NOT_Z_W],
+        logics[IDX_NOT_X_Y_NOT_Z_NOT_W],
+        logics[IDX_NOT_X_NOT_Y_Z_W],
+        logics[IDX_NOT_X_NOT_Y_Z_NOT_W],
+        logics[IDX_NOT_X_NOT_Y_NOT_Z_W],
+        logics[IDX_NOT_X_NOT_Y_NOT_Z_NOT_W]);
   }
 
   /** Eliminates X from this scale. */

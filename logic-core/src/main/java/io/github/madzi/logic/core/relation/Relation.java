@@ -17,30 +17,30 @@ public sealed interface Relation<R extends Relation<?>>
   R inverse();
 
   /** Returns the intersection of this relation with another. */
-  R intersect(R other);
+  R intersect(final R other);
 
   /** Returns the union of this relation with another. */
-  R union(R other);
+  R union(final R other);
 
-  /** Creates relation A. */
+  /** Creates Aristotelian relation A (All S are P). */
   static Relation2 A() {
     return RelationFactory.INSTANCE.createRelation(
         new DKScale2(Logic.TRUE, Logic.FALSE, Logic.UNKNOWN, Logic.TRUE));
   }
 
-  /** Creates relation E. */
+  /** Creates Aristotelian relation E (No S are P). */
   static Relation2 E() {
     return RelationFactory.INSTANCE.createRelation(
         new DKScale2(Logic.FALSE, Logic.TRUE, Logic.TRUE, Logic.UNKNOWN));
   }
 
-  /** Creates relation I. */
+  /** Creates Aristotelian relation I (Some S are P). */
   static Relation2 I() {
     return RelationFactory.INSTANCE.createRelation(
         new DKScale2(Logic.TRUE, Logic.UNKNOWN, Logic.UNKNOWN, Logic.TRUE));
   }
 
-  /** Creates relation O. */
+  /** Creates Aristotelian relation O (Some S are not P). */
   static Relation2 O() {
     return RelationFactory.INSTANCE.createRelation(
         new DKScale2(Logic.UNKNOWN, Logic.TRUE, Logic.TRUE, Logic.UNKNOWN));

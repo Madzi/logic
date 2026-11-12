@@ -20,7 +20,8 @@ public record Relation2(DKScale2 scale) implements Relation<Relation2> {
 
   /** Returns the conclusion of this relation with another. */
   public Relation2 conclusion(final Relation2 other) {
-    return Relation.create(this.scale.liftAsXY().and(other.scale.liftAsYZ()).eliminateY());
+    return Relation.create(
+        this.scale.liftAsXY().and(other.scale.liftAsYZ()).eliminateY());
   }
 
   @Override

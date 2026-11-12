@@ -5,10 +5,12 @@ import io.github.madzi.logic.core.Logic;
 public record DKScale1(Logic x, Logic x_) implements DKScale<DKScale1> {
   /** Length of the scale. */
   private static final int LENGTH = 2;
+  private static final int IDX_X  = 0;
+  private static final int IDX_NOT_X = 1;
 
   /** Constructs a DKScale1 from an array of Logics. */
   public DKScale1(final Logic[] logics) {
-    this(checkLength(logics)[0], logics[1]);
+    this(checkLength(logics)[IDX_X], logics[IDX_NOT_X]);
   }
 
   /** Constructs a DKScale1 from a single Logic value. */

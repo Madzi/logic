@@ -17,6 +17,11 @@
         <dependencies>
             <dependency>
                 <groupId>io.github.madzi</groupId>
+                <artifactId>logic-build-tools</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.madzi</groupId>
                 <artifactId>logic-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -55,6 +60,26 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>3.7.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>3.11.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.6.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>3.28.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.10.5.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -63,6 +88,7 @@
         <module>logic-console</module>
         <module>logic-engine</module>
         <module>logic-calc</module>
+        <module>logic-build-tools</module>
     </modules>
     <profiles>
         <profile>
@@ -113,7 +139,6 @@
                     <plugin>
                         <groupId>com.diffplug.spotless</groupId>
                         <artifactId>spotless-maven-plugin</artifactId>
-                        <version>3.11.0</version>
                         <executions>
                             <execution>
                                 <goals>
@@ -130,7 +155,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
-                        <version>3.6.0</version>
                         <executions>
                             <execution>
                                 <id>validate</id>
@@ -140,11 +164,20 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>io.github.madzi</groupId>
+                                <artifactId>logic-build-tools</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <configLocation>checkstyle.xml</configLocation>
+                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-pmd-plugin</artifactId>
-                        <version>3.28.0</version>
                         <executions>
                             <execution>
                                 <id>pmd-check</id>
@@ -158,7 +191,6 @@
                     <plugin>
                         <groupId>com.github.spotbugs</groupId>
                         <artifactId>spotbugs-maven-plugin</artifactId>
-                        <version>4.10.5.0</version>
                         <executions>
                             <execution>
                                 <id>analyze</id>

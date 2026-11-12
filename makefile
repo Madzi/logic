@@ -30,12 +30,17 @@ build: ## Clean and build the project with tests
 run: ## Run the project locally
 	$(MVN) $(MVN_ARGS) exec:java
 
+# Install logic-build-tools into local Maven repo (needed for static analysis checks)
+.PHONY: install-builtin
+install-builtin: ## Install logic-build-tools to local Maven repository
+	$(MVN) $(MVN_ARGS) install -f logic-build-tools/pom.xml
+
 .PHONY: format
 format: ## Format the source code using Spotless
 	$(MVN) $(MVN_ARGS) spotless:apply -Pstatic-analysis
 
 .PHONY: analysis
-analysis: ## Run all static code analysis checks (Checkstyle, PMD, SpotBugs)
+analysis: install-builtin ## Run all static code analysis checks (Checkstyle, PMD, SpotBugs)
 	$(MVN) $(MVN_ARGS) clean verify -Pstatic-analysis
 
 .PHONY: clean
