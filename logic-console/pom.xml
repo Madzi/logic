@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
     <name>Logic :: Console</name>
     <properties>
-        <exec.mainClass>io.github.madzi.logic.console.LogicConsole</exec.mainClass>
+        <exec.mainClass>io.github.madzi.logic.console.Console</exec.mainClass>
     </properties>
     <dependencies>
         <dependency>
@@ -20,6 +20,22 @@
         <dependency>
             <groupId>io.github.madzi</groupId>
             <artifactId>logic-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline-terminal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline-terminal-ffm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline-reader</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline-builtins</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -163,4 +163,4 @@ O: S -> P   - means: `Some S are not P`
 
 ## License
 
-MIT License
+Apache License, Version 2.0

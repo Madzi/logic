@@ -11,11 +11,13 @@
         <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>${java.version}</maven.compiler.release>
+        <version.jline>4.7.0</version.jline>
         <version.junit>6.1.0</version.junit>
     </properties>
     <licenses>
         <license>
-            <name>MIT</name>
+            <name>Apache License, Version 2.0</name>
+            <url>https://apache.org</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -50,6 +52,26 @@
                 <groupId>io.github.madzi</groupId>
                 <artifactId>logic-lexer</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jline</groupId>
+                <artifactId>jline-terminal</artifactId>
+                <version>${version.jline}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jline</groupId>
+                <artifactId>jline-terminal-ffm</artifactId>
+                <version>${version.jline}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jline</groupId>
+                <artifactId>jline-reader</artifactId>
+                <version>${version.jline}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jline</groupId>
+                <artifactId>jline-builtins</artifactId>
+                <version>${version.jline}</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
